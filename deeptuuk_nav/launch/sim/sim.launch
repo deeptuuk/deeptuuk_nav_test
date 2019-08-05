@@ -1,6 +1,8 @@
 <launch>
 
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find deeptuuk_nav)/maps/test.pgm"/>
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 map odom 100" />
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find deeptuuk_nav)/maps/test.yaml"/>
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch" />
     <!-- 加载机器人模型描述参数 -->
