@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="PI" value="3.14159"/>
+    <xacro:property name="base_l" value="0.3"/>
+    <xacro:property name="base_w" value="0.2"/>
+    <xacro:property name="base_h" value="0.1"/>
+
+    <xacro:property name="wheel_l" value="0.04"/>
+    <xacro:property name="wheel_r" value="0.04"/>
+
+    <xacro:macro name="base_to_wheel_joint" params="parent number x_loc y_loc z_loc">
+        <joint name="base_to_wheel_joint_${number}" type="continuous">
+            <origin xyz="${x_loc} ${y_loc} ${z_loc}" rpy="0 0 0" />
+            <parent link="${parent}"/>
+            <child link="wheel_${number}" />     
+            <axis xyz="0 1 0"/>     
+        </joint>
+
+        <link name="wheel_${number}">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="${PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${wheel_r}" length = "${wheel_l}"/>
+                </geometry>
+                <material name="gray">
+                    <color rgba="0.75 0.75 0.75 1"/>
+                </material>
+            </visual>
+
+            <inertial>
+                <mass value="1" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.00053" ixy="0.00000" ixz="0.00000"
+                        iyy="0.00053" iyz="0.00000" izz="0.00080" />
+            </inertial>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${wheel_r}" length = "${wheel_l}"/>
+                </geometry>            
+            </collision>            
+        </link>
+
+        <gazebo reference="wheel_${number}">
+            <material>Gazebo/Gray</material>
+        </gazebo>          
+
+        <transmission name="simple_trans_${number}">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="base_to_wheel_joint_${number}" />
+            <actuator name="actuator_${number}">
+                <mechanicalReduction>1</mechanicalReduction>
+                <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            </actuator>
+        </transmission>      
+    </xacro:macro>
+
+    <xacro:macro name="my_robot">
+        <link name="base_link">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.15 0.1 0.05" />
+                </geometry>
+                <material name="yellow">
+                    <color rgba="1 0.4 0 1"/>
+                </material>
+            </visual>
+
+            <inertial>
+                <mass value="5" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.02083" ixy="0.00000" ixz="0.00000"
+                        iyy="0.04166" iyz="0.00000" izz="0.05416" />
+            </inertial>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.15 0.1 0.05" />
+                </geometry>            
+            </collision>             
+        </link>
+
+        <gazebo reference="base_link">
+            <material>Gazebo/Yellow</material>
+        </gazebo>          
+
+        <base_to_wheel_joint parent="base_link" number="front_left" x_loc="${base_l/2}" y_loc="${base_w/2 + wheel_l/2}" z_loc="${-base_h/2}"/>
+        <base_to_wheel_joint parent="base_link" number="front_righ" x_loc="${base_l/2}" y_loc="${-base_w/2 - wheel_l/2}" z_loc="${-base_h/2}"/>
+        <base_to_wheel_joint parent="base_link" number="back_left" x_loc="${-base_l/2}" y_loc="${base_w/2 + wheel_l/2}" z_loc="${-base_h/2}"/>
+        <base_to_wheel_joint parent="base_link" number="back_righ" x_loc="${-base_l/2}" y_loc="${-base_w/2 - wheel_l/2}" z_loc="${-base_h/2}"/>
+
+    </xacro:macro> 
+</robot>

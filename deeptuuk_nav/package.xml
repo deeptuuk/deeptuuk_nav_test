@@ -1,0 +1,23 @@
+<package>
+  <name>deeptuuk_nav</name>
+  <version>1.0.0</version>
+  <description>
+    deeptuuk 
+  </description>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+  <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
+  <maintainer email="ahoy@fetchrobotics.com">Aaron Hoy</maintainer>
+  <license>BSD</license>
+
+  <author>David Lu!!</author>
+  <url>http://wiki.ros.org/global_planner</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+
+  <export>
+      <nav_core plugin="${prefix}/deeptuuk_global_planner_plugin.xml" />
+  </export>
+
+</package>

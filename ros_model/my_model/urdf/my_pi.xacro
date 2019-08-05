@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="PI" value="3.14159"/>
+    <xacro:property name="base_l" value="0.1"/>
+    <xacro:property name="base_r" value="0.15"/>
+
+    <xacro:property name="wheel_l" value="0.04"/>
+    <xacro:property name="wheel_r" value="0.04"/>
+
+    <xacro:property name="fix_r" value="0.02"/>
+
+    <xacro:macro name="base_to_wheel_joint" params="parent number x_loc y_loc z_loc">
+        <joint name="base_to_wheel_joint_${number}" type="continuous">
+            <origin xyz="${x_loc} ${y_loc} ${z_loc}" rpy="0 0 0" />
+            <parent link="${parent}"/>
+            <child link="wheel_${number}" />     
+            <axis xyz="0 1 0"/>     
+        </joint>
+
+        <link name="wheel_${number}">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="${PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${wheel_r}" length = "${wheel_l}"/>
+                </geometry>
+                <material name="gray">
+                    <color rgba="0.75 0.75 0.75 1"/>
+                </material>
+            </visual>
+
+            <inertial>
+                <mass value="1" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.00053" ixy="0.00000" ixz="0.00000"
+                        iyy="0.00053" iyz="0.00000" izz="0.00080" />
+            </inertial>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${wheel_r}" length = "${wheel_l}"/>
+                </geometry>            
+            </collision>            
+        </link>
+
+        <gazebo reference="wheel_${number}">
+            <material>Gazebo/Gray</material>
+            <mu1>100</mu1>
+            <mu2>100</mu2>            
+        </gazebo>          
+
+        <transmission name="simple_trans_${number}">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="base_to_wheel_joint_${number}" />
+            <actuator name="actuator_${number}">
+                <mechanicalReduction>1</mechanicalReduction>
+                <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            </actuator>
+        </transmission>      
+    </xacro:macro>
+
+    <xacro:macro name="base_to_fix_joint" params="parent number x_loc y_loc z_loc">
+        <joint name="base_to_wheel_fix_${number}" type="fixed">
+            <origin xyz="${x_loc} ${y_loc} ${z_loc}" rpy="0 0 0" />
+            <parent link="${parent}"/>
+            <child link="fix_${number}" />        
+        </joint>
+
+        <link name="fix_${number}">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <sphere radius="${fix_r}"/>
+                </geometry>
+                <material name="gray">
+                    <color rgba="0.75 0.75 0.75 1"/>
+                </material>
+            </visual>
+
+            <inertial>
+                <mass value="1" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.00053" ixy="0.00000" ixz="0.00000"
+                        iyy="0.00053" iyz="0.00000" izz="0.00080" />
+            </inertial>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <sphere radius="${fix_r}"/>
+                </geometry>            
+            </collision>            
+        </link>
+
+        <gazebo reference="fix_${number}">
+            <material>Gazebo/Gray</material>
+            <mu1>0.0</mu1>
+            <mu2>0.0</mu2>            
+        </gazebo>           
+    </xacro:macro>    
+
+    <xacro:macro name="my_robot">
+        <link name="base_link">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder radius="${base_r}" length = "${base_l}"/>
+                </geometry>
+                <material name="yellow">
+                    <color rgba="1 0.4 0 1"/>
+                </material>
+            </visual>
+
+            <inertial>
+                <mass value="5" />
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.02083" ixy="0.00000" ixz="0.00000"
+                        iyy="0.04166" iyz="0.00000" izz="0.05416" />
+            </inertial>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder radius="${base_r}" length = "${base_l}"/>
+                </geometry>            
+            </collision>             
+        </link>
+
+        <gazebo reference="base_link">
+            <material>Gazebo/Yellow</material>
+        </gazebo>          
+
+        <base_to_wheel_joint parent="base_link" number="left" x_loc="0" y_loc="${base_r + wheel_l/2}" z_loc="${-base_l/2}"/>
+        <base_to_wheel_joint parent="base_link" number="righ" x_loc="0" y_loc="${-base_r - wheel_l/2}" z_loc="${-base_l/2}"/>
+        <base_to_fix_joint parent="base_link" number="front" x_loc="${base_r}" y_loc="0" z_loc="${-base_l/2 - fix_r}"/>
+        <base_to_fix_joint parent="base_link" number="back" x_loc="${-base_r}" y_loc="0" z_loc="${-base_l/2 - fix_r}"/>
+
+    </xacro:macro> 
+</robot>
