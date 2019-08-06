@@ -14,6 +14,11 @@ namespace deeptuuk {
             bool makePlan(const geometry_msgs::PoseStamped& start, 
                 const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan);
             void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+            void initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame);
+
+        protected:
+            bool initialized_;      
+            ros::Publisher plan_pub_;
     };
 };
 

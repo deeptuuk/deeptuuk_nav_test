@@ -1,0 +1,7 @@
+<library path="lib/deeptuuk_local_planner">
+  <class name="deeptuuk_local_planner" type="deeptuuk::DeepTuukLocalPlanner" base_class_type="nav_core::BaseLocalPlanner">
+    <description>
+      deeptuuk
+    </description>
+  </class>
+</library>
