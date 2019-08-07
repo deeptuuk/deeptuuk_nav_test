@@ -15,6 +15,12 @@ namespace deeptuuk {
             bool isGoalReached();
             bool setPlan(const std::vector<geometry_msgs::PoseStamped>& plan);
             void initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros);
+        protected:
+            bool initialized_;
+            int state_flag;
+            double yaw_error;
+            double yaw_error_last;
+            double yaw_error_sum=0;
     };
 };
 

@@ -1,0 +1,42 @@
+<launch>
+
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 map odom 100" />
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find deeptuuk_nav)/maps/test.yaml"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" />
+    <!-- 加载机器人模型描述参数 -->
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find my_model)/urdf/my_pi_with_rplidar.xacro'" />     
+
+    <!-- 运行joint_state_publisher节点，发布机器人的关节状态  -->
+    <!--<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node> -->
+
+    <!-- 运行robot_state_publisher节点，发布tf  -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"  output="screen" >
+        <param name="publish_frequency" type="double" value="10.0" />
+    </node>
+
+    <node name="joy_node0" pkg="joy" type="joy_node">
+    	<param name="dev" value="/dev/input/js0"/>
+  	</node>    
+
+    <node name="joy_trans" pkg="joy_node" type="joy_node_pub" />    
+
+    <!-- 在gazebo中加载机器人模型-->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+          args="-urdf -model deeptuuk -param robot_description"/>
+
+    <node
+        name="rviz" pkg="rviz" type="rviz" args="-d $(find my_model)/rviz/my_model.rviz" />  
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+        <rosparam file="$(find deeptuuk_nav)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find deeptuuk_nav)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find deeptuuk_nav)/params/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find deeptuuk_nav)/params/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find deeptuuk_nav)/params/move_base_params.yaml" command="load" />
+        <!-- <rosparam file="$(find deeptuuk_nav)/params/dwa_local_planner_params_$(arg model).yaml" command="load" /> -->
+        <!-- <rosparam file="$(find deeptuuk_nav)/params/global_planner_params.yaml" command="load" /> -->
+    </node>  
+
+</launch>

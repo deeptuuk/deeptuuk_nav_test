@@ -5,39 +5,19 @@
 #include <costmap_2d/costmap_2d.h>
 #include <nav_msgs/Path.h>
 
+#include <math.h>
+
 //register this planner as a BaseGlobalPlanner plugin
 PLUGINLIB_EXPORT_CLASS(deeptuuk::DeepTuukGlobalPlanner, nav_core::BaseGlobalPlanner)
 
 namespace deeptuuk {
 
-    void DeepTuukGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame)
+    void DeepTuukGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string frame_id)
     {
         if(!initialized_){
-        //   costmap_ = costmap;
-        //   global_frame_ = global_frame;
-        //   planner_ = boost::shared_ptr<NavFn>(new NavFn(costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY()));
-
             ros::NodeHandle private_nh("~/" + name);
-
             plan_pub_ = private_nh.advertise<nav_msgs::Path>("plan", 1);
-
-            //private_nh.param("visualize_potential", visualize_potential_, false);
-
-            //if we're going to visualize the potential array we need to advertise
-        //   if(visualize_potential_)
-        //     potarr_pub_.advertise(private_nh, "potential", 1);
-
-        //   private_nh.param("allow_unknown", allow_unknown_, true);
-        //   private_nh.param("planner_window_x", planner_window_x_, 0.0);
-        //   private_nh.param("planner_window_y", planner_window_y_, 0.0);
-        //   private_nh.param("default_tolerance", default_tolerance_, 0.0);
-
-            //get the tf prefix
-            //ros::NodeHandle prefix_nh;
-            //tf_prefix_ = tf::getPrefixParam(prefix_nh);
-
-            //make_plan_srv_ =  private_nh.advertiseService("make_plan", &NavfnROS::makePlanService, this);
-
+            frame_id_ = frame_id;
             initialized_ = true;
         }
         else{
@@ -50,25 +30,102 @@ namespace deeptuuk {
         initialize(name, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
     }
 
-    bool makePlan(const geometry_msgs::PoseStamped& start, 
+    bool DeepTuukGlobalPlanner::makePlan(const geometry_msgs::PoseStamped& start, 
         const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan)
     {
+        plan.clear();
 
-        double x1=-18.21, y1=64.97, x2=-17.23, y2=61.45;
+        double x1=start.pose.position.x;
+        double y1=start.pose.position.y;
+
+        double x2=goal.pose.position.x;
+        double y2=goal.pose.position.y;
+
+        geometry_msgs::PoseStamped pose;
+        pose.header.frame_id = frame_id_;
+        pose.pose.position.x = x1;
+        pose.pose.position.y = y1;
+        pose.pose.position.z = 0.0;
+        pose.pose.orientation.x = start.pose.orientation.x;
+        pose.pose.orientation.y = start.pose.orientation.y;
+        pose.pose.orientation.z = start.pose.orientation.z;
+        pose.pose.orientation.w = start.pose.orientation.w;     
+        
+        plan.push_back(pose);
+
         double dis = hypot(x1-x2, y1-y2);
-        double k = (y2 - y1)/(x2 - x1);
-        double b = (y2 -k*x2);
-        //std::cout << dis << std::endl;
-        double temp_sum = (dis/0.1);
-        double temp = 0;
-        int i=0;
-        for(i=0;i<=temp_sum;i++)
-        {
-            temp = x1 + (x2 - x1)/temp_sum*i;
-            std::cout << std::setprecision(4) << temp << " " << std::setprecision(4) << k*temp+b <<" "<<0.0<< std::endl;
+        double temp_sum = (dis/0.05);
+
+        if( (x2 - x1 == 0) && (y2 - y1 == 0) ){
+            return false;
+        }
+        else if( (x2 - x1 == 0) ){
+            for(int i=1;i<temp_sum;i++){
+                pose.pose.position.x = x1;
+                pose.pose.position.y = y1 + (y2 -y1)/temp_sum*i; 
+                pose.pose.position.z = 0.0;
+                pose.pose.orientation.x = 0.0;
+                pose.pose.orientation.y = 0.0;
+                pose.pose.orientation.z = 0.0;
+                pose.pose.orientation.w = 1.0;
+                plan.push_back(pose);
+            }
+        }
+        else if( (y2 - y1 == 0) ){
+            for(int i=1;i<temp_sum;i++){
+                pose.pose.position.x = x1 + (x2 -x1)/temp_sum*i;
+                pose.pose.position.y = y1; 
+                pose.pose.position.z = 0.0;
+                pose.pose.orientation.x = 0.0;
+                pose.pose.orientation.y = 0.0;
+                pose.pose.orientation.z = 0.0;
+                pose.pose.orientation.w = 1.0;
+                plan.push_back(pose);
+            }
+        }
+        else{
+            double k = (y2 - y1)/(x2 - x1);
+            double b = (y2 -k*x2);
+            double temp = 0;
+
+            for(int i=1;i<temp_sum;i++){
+                temp = x1 + (x2 - x1)/temp_sum*i;
+                //std::cout << std::setprecision(4) << temp << " " << std::setprecision(4) << k*temp+b <<" "<<0.0<< std::endl;
+                geometry_msgs::PoseStamped pose;
+                pose.header.frame_id = frame_id_;
+                pose.pose.position.x = temp;
+                pose.pose.position.y = k*temp+b;
+                pose.pose.position.z = 0.0;
+                pose.pose.orientation.x = 0.0;
+                pose.pose.orientation.y = 0.0;
+                pose.pose.orientation.z = 0.0;
+                pose.pose.orientation.w = 1.0;
+                plan.push_back(pose);
+            }
         }
 
+        pose.pose.position.x = x2;
+        pose.pose.position.y = y2;
+        pose.pose.position.z = 0.0;
+        pose.pose.orientation.x = goal.pose.orientation.x;
+        pose.pose.orientation.y = goal.pose.orientation.y;
+        pose.pose.orientation.z = goal.pose.orientation.z;
+        pose.pose.orientation.w = goal.pose.orientation.w;             
 
+        plan.push_back(pose);
+
+        nav_msgs::Path gui_path;
+        gui_path.poses.resize(plan.size());
+
+        gui_path.header.frame_id = frame_id_;
+        gui_path.header.stamp = ros::Time::now();
+
+        // Extract the plan in world co-ordinates, we assume the path is all in the same frame
+        for (unsigned int i = 0; i < plan.size(); i++) {
+            gui_path.poses[i] = plan[i];
+        }
+
+        plan_pub_.publish(gui_path);
         return true;
     }
 
