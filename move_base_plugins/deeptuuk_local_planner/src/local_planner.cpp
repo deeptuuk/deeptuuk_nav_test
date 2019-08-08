@@ -38,15 +38,15 @@ namespace deeptuuk {
             dis_error = 0;
             dis_error_last = 0;
             yaw_cur = 0;    
-              
+
             goal_reached_flag = 1;             
         }        
 
         if(state_flag == 3){
             yaw_error = end_yaw - yaw_cur;
 
-            cmd_vel.angular.z = -(1.0f* yaw_error + 0.2f*(yaw_error - yaw_error_last)); //+ 0.01f * yaw_error_sum;
-            if( (yaw_error < 0.03f) && (yaw_error > -0.03f) ){
+            cmd_vel.angular.z = -(1.0f* yaw_error + 0.1f*(yaw_error - yaw_error_last)); //+ 0.01f * yaw_error_sum;
+            if( (yaw_error < 0.06f) && (yaw_error > -0.06f) ){
                 state_flag = 4;
                 //ROS_INFO("1111111111");  
             }              
@@ -55,11 +55,11 @@ namespace deeptuuk {
         if(state_flag == 2){
             yaw_error = exp_yaw - yaw_cur;
 
-            cmd_vel.angular.z = -(1.0f* yaw_error + 0.2f*(yaw_error - yaw_error_last));
+            cmd_vel.angular.z = -(1.0f* yaw_error + 0.1f*(yaw_error - yaw_error_last));
             cmd_vel.linear.x = 0.4f*dis_error; //+ 0.01f*(dis_error - dis_error_last);
 
-            cmd_vel.linear.x = ( (cmd_vel.linear.x > 0.4f) ? 0.4f:cmd_vel.linear.x );
-            cmd_vel.linear.x = ( (cmd_vel.linear.x < -0.4f) ? -0.4f:cmd_vel.linear.x );
+            cmd_vel.linear.x = ( (cmd_vel.linear.x > 0.5f) ? 0.5f:cmd_vel.linear.x );
+            cmd_vel.linear.x = ( (cmd_vel.linear.x < -0.5f) ? -0.5f:cmd_vel.linear.x );
 
             if( (dis_error < 0.02f) && (dis_error > -0.02f) ){
                 state_flag = 3;       
@@ -70,8 +70,8 @@ namespace deeptuuk {
         if(state_flag == 1){
             yaw_error = exp_yaw - yaw_cur;
 
-            cmd_vel.angular.z = -(1.0f* yaw_error + 0.2f*(yaw_error - yaw_error_last)); //+ 0.01f * yaw_error_sum;
-            if( (yaw_error < 0.03f) && (yaw_error > -0.03f) ){
+            cmd_vel.angular.z = -(1.0f* yaw_error + 0.1f*(yaw_error - yaw_error_last)); //+ 0.01f * yaw_error_sum;
+            if( (yaw_error < 0.06f) && (yaw_error > -0.06f) ){
                 state_flag = 2;
             }            
         }              
