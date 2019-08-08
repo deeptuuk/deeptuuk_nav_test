@@ -9,6 +9,14 @@
 
 	<my_robot/>
 
+	<!-- rplidar -->
+	<joint name="rplidar_joint" type="fixed">
+		<origin xyz="${rplidar_offset_x} ${rplidar_offset_y} ${rplidar_offset_z}" rpy="0 0 0" />
+		<parent link="base_link"/>
+		<child link="laser_link"/>
+	</joint>
+	<rplidar/>    
+
     <gazebo>
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
         <alwaysOn>true</alwaysOn>
@@ -17,7 +25,7 @@
         <rightJoint>base_to_wheel_joint_righ</rightJoint>
         <wheelSeparation>0.34</wheelSeparation>
         <wheelDiameter>0.08</wheelDiameter>
-        <torque>50</torque>
+        <torque>100</torque>
         <commandTopic>cmd_vel</commandTopic>
         <odometryTopic>odom</odometryTopic>
         <odometryFrame>odom</odometryFrame>

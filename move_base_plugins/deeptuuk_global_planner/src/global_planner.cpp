@@ -112,6 +112,7 @@ namespace deeptuuk {
         pose.pose.orientation.z = goal.pose.orientation.z;
         pose.pose.orientation.w = goal.pose.orientation.w;             
 
+        //ROS_INFO("global: %f %f %f %f",pose.pose.orientation.x,pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w);
         plan.push_back(pose);
 
         nav_msgs::Path gui_path;
